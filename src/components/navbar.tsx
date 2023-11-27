@@ -12,10 +12,10 @@ const Navbar = () => {
                 <p className='text-2xl font-semibold'>Fake News Detector</p>
                 <div className='hidden sm:block'>
                     <Button variant="link" asChild>
-                        <Link href="/" className={`${pathname === "/" ? "underline-offset-4 underline" : ""}`}>Home</Link>
+                        <Link href="/" className={`${pathname === "/" ? "underline-offset-4 underline" : "text-black"}`}>Home</Link>
                     </Button>
                     <Button variant="link" asChild>
-                        <Link href="/news" className={`${pathname === "/news" ? "underline-offset-4 underline" : ""}`}>News</Link>
+                        <Link href="/news" className={`${pathname === "/news" ? "underline-offset-4 underline" : "text-black"}`}>News</Link>
                     </Button>
                 </div>
             </div>

@@ -9,9 +9,13 @@ export const env = createEnv({
   server: {
     QDRANT_URL: z.string().url(),
     QDRANT_API_KEY: z.string().optional(),
+    QDRANT_COLLECTION_NAME: z.string().min(1),
+    OPENAI_API_KEY:z.string().min(1),
   },
   runtimeEnv: {
     QDRANT_URL: process.env.QDRANT_URL,
-    QDRANT_API_KEY: process.env.QDRANT_API_KEY
+    QDRANT_API_KEY: process.env.QDRANT_API_KEY,
+    QDRANT_COLLECTION_NAME: process.env.QDRANT_COLLECTION_NAME,
+    OPENAI_API_KEY:process.env.OPENAI_API_KEY,
   },
 })

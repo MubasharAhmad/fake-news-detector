@@ -2,8 +2,7 @@ import axios from "axios";
 import { NextRequest } from "next/server";
 
 export async function POST(req: NextRequest) {
-	const body = await req.json();
-	const url = body.url;
+	const {url} = await req.json();
 	console.log(url);
 	try {
 		const data = await axios.get(url);

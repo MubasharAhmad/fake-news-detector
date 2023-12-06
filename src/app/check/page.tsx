@@ -14,10 +14,34 @@ export default function Home() {
 		setUrl(e.currentTarget.value);
 		setError("");
 	};
-	const handleSubmit = async () => {
+	const handleCheck = async () => {
 		try{
 			await axios.get(url);
 			setSuccess(true);
+		}
+		catch(err){
+			try {
+				const response = await axios.post("/api/get-page", {
+					url,
+				});
+				setData(response.data.data);
+				console.log(response.data.data);
+				// Handle the response data
+			} catch (error) {
+				console.error("Error:", error);
+				if(error instanceof Error){
+					setError(error.message);
+				}
+				// Handle the error
+			}
+		}
+	};
+	const handleAddToVectorStore = async () => {
+		try{
+			const res = await axios.post("/api/add-to-vectorstore", {
+				url,
+			});
+			console.log(res.data);
 		}
 		catch(err){
 			try {
@@ -55,8 +79,8 @@ export default function Home() {
 					onChange={handleInputChange}
 				/>
                 <div className="flex flex-col sm:flex-row gap-5">
-				<Button onClick={handleSubmit}>Check</Button>
-                <Button onClick={handleSubmit}>Add to Vectorstore</Button>
+				<Button onClick={handleCheck}>Check</Button>
+                <Button onClick={handleAddToVectorStore}>Add to Vectorstore</Button>
 				</div>
 			</div>
 

@@ -3,7 +3,7 @@ import { QdrantVectorStore } from "langchain/vectorstores/qdrant";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { NextRequest } from "next/server";
-import { Document } from "langchain/document";
+import { removeStopwords } from 'stopword'
 import { env } from "@/env.mjs";
 import axios from "axios";
 
@@ -52,8 +52,11 @@ export async function POST(req: NextRequest) {
     const { news, url, valid } = await req.json();
     console.log(news, url, valid);
 
+    const topKeywords = removeStopwords(news.split(" "));
+    console.log(topKeywords);
+
     await vectorStore.ensureCollection();
-    await vectorStore.addDocuments([{ pageContent: news, metadata: { url: url, valid: valid } }]);
+    await vectorStore.addDocuments([{ pageContent: news, metadata: { url: url, valid: valid, topKeywords : topKeywords } }]);
     console.log("Added to vector store");
     return Response.json({ success: true });
   } catch (e) {

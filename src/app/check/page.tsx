@@ -6,44 +6,58 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
+	const [news, setNewsTitle] = useState("");
 	const [url, setUrl] = useState("");
+	const [valid, setIsNewsValid] = useState(false);
 	const [success, setSuccess] = useState(false);
 	const [error, setError] = useState("");
-    const [data, setData] = useState("");
+	const [data, setData] = useState("");
 	const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
 		setUrl(e.currentTarget.value);
 		setError("");
 	};
+
+	const handleInputTextChange: ChangeEventHandler<HTMLInputElement> = (e) => {
+		setNewsTitle(e.currentTarget.value);
+		setError("");
+	}
+
 	const handleCheck = async () => {
-		try{
-			await axios.get(url);
-			setSuccess(true);
-		}
-		catch(err){
+
+		// check if info is a url
+		if (isValidUrl(url)) {
 			try {
-				const response = await axios.post("/api/get-page", {
-					url,
-				});
-				setData(response.data.data);
-				console.log(response.data.data);
-				// Handle the response data
-			} catch (error) {
-				console.error("Error:", error);
-				if(error instanceof Error){
-					setError(error.message);
+				await axios.get(url);
+				setSuccess(true);
+			}
+			catch (err) {
+				try {
+					const response = await axios.post("/api/get-page", {
+						url,
+					});
+					setData(response.data.data);
+					console.log(response.data.data);
+					// Handle the response data
+				} catch (error) {
+					console.error("Error:", error);
+					if (error instanceof Error) {
+						setError(error.message);
+					}
+					// Handle the error
 				}
-				// Handle the error
 			}
 		}
 	};
 	const handleAddToVectorStore = async () => {
-		try{
+		try {
 			const res = await axios.post("/api/add-to-vectorstore", {
 				url,
+				news,
+				valid,
 			});
 			console.log(res.data);
 		}
-		catch(err){
+		catch (err) {
 			try {
 				const response = await axios.post("/api/get-page", {
 					url,
@@ -53,7 +67,7 @@ export default function Home() {
 				// Handle the response data
 			} catch (error) {
 				console.error("Error:", error);
-				if(error instanceof Error){
+				if (error instanceof Error) {
 					setError(error.message);
 				}
 				// Handle the error
@@ -68,7 +82,11 @@ export default function Home() {
 			return false;
 		}
 	};
-    
+
+	const handleCheckboxChange = () => {
+		setIsNewsValid(!valid);
+	};
+
 	console.log(success);
 	return (
 		<div className='container'>
@@ -78,13 +96,27 @@ export default function Home() {
 					placeholder='Enter URL'
 					onChange={handleInputChange}
 				/>
-                <div className="flex flex-col sm:flex-row gap-5">
-				<Button onClick={handleCheck}>Check</Button>
-                <Button onClick={handleAddToVectorStore}>Add to Vectorstore</Button>
+				<Input
+					type='text'
+					placeholder='Enter Text'
+					onChange={handleInputTextChange}
+				/>
+				<div className="flex items-center">
+					<input
+						type="checkbox"
+						id="isNewsValid"
+						checked={valid}
+						onChange={handleCheckboxChange}
+					/>
+					<label htmlFor="isNewsValid" className="ml-2">Is News Valid</label>
+				</div>
+				<div className="flex flex-col sm:flex-row gap-5">
+					<Button onClick={handleCheck}>Check</Button>
+					<Button onClick={handleAddToVectorStore}>Add to Vectorstore</Button>
 				</div>
 			</div>
 
-			{url && isValidUrl(url) ? (
+			{url && isValidUrl(url) && (
 				<div
 					className='flex flex-col items-center justify-center h-[300px] sm:h-[500px] w-full max-w-screen-xl mx-auto'
 				>
@@ -96,12 +128,10 @@ export default function Home() {
 							allowFullScreen
 						></iframe>
 					) : (
-						<div dangerouslySetInnerHTML={{ __html: data.replaceAll("<img", "<div").replaceAll("img/>", "div/>").replaceAll("<svg", "<div") }}/>
+						<div dangerouslySetInnerHTML={{ __html: data.replaceAll("<img", "<div").replaceAll("img/>", "div/>").replaceAll("<svg", "<div") }} />
 					)}
 					{error && <p className="text-red-500">{error}</p>}
 				</div>
-			) : (
-				url && !isValidUrl(url) && <p className="text-red-500">Please enter a valid URL.</p>
 			)}
 		</div>
 	);

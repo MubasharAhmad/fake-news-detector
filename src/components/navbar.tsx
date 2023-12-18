@@ -22,6 +22,9 @@ const Navbar = () => {
                     <Button variant="link" asChild>
                         <Link href="/news" className={`${pathname === "/news" ? "underline-offset-4 underline" : "text-black"}`}>News</Link>
                     </Button>
+                    <Button variant="link" asChild>
+                        <Link href="/detect-news" className={`${pathname === "/detect-news" ? "underline-offset-4 underline" : "text-black"}`}>Detect News</Link>
+                    </Button>
                 </div>
             </div>
         </nav>

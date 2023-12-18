@@ -17,7 +17,7 @@ const DetectNews = () => {
     e.preventDefault()
   }
   return (
-    <div className='min-h-screen flex flex-col items-start justify-center'>
+    <div className="container mt-28 overflow-hidden">
       <Card className="mx-2 sm:mx-auto">
         <CardHeader>
           <CardTitle>Detect News</CardTitle>
@@ -27,7 +27,9 @@ const DetectNews = () => {
           <form onSubmit={handleSubmit}>
             <div className="grid w-full items-center gap-4">
               <Textarea placeholder="Type your news here..." />
-              <Button type='submit' className='w-full'>Detect</Button>
+              <div className='flex justify-end'>
+                <Button type='submit' className='w-32'>Detect</Button>
+              </div>
             </div>
           </form>
         </CardContent>

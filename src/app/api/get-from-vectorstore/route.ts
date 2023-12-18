@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     });
 
     try {
-        console.log("Getting all documents");
+        // console.log("Getting all documents");
         await vectorStore.ensureCollection();
 
         const allDocuments = await vectorStore.similaritySearch(
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
             10,
         );   
         
-        console.log(allDocuments);
+        // console.log(allDocuments);
 
         return Response.json({ success: true, allDocuments });
     }

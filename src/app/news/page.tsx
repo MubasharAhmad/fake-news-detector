@@ -1,5 +1,8 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import axios from "axios"
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -18,12 +21,7 @@ import React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu"
+
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -36,25 +34,26 @@ import {
 
 export type FakeNews = {
   id: string
-  title: string
+  news: string
   valid: true | false
   url: string
 }
 
-const data: FakeNews[] = [
-  {
-    id: "1",
-    title: "The COVID-19 vaccine is safe and effective.",
-    valid: true,
-    url: "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/safety/safety-of-vaccines.html",
-  },
-  {
-    id: "2",
-    title: "ahe COVID-19 vaccine is safe and effective.",
-    valid: true,
-    url: "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/safety/safety-of-vaccines.html",
-  },
-];
+
+// const data: FakeNews[] = [
+//   {
+//     id: "1",
+//     news: "The COVID-19 vaccine is safe and effective.",
+//     valid: true,
+//     url: "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/safety/safety-of-vaccines.html",
+//   },
+//   {
+//     id: "2",
+//     news: "ahe COVID-19 vaccine is safe and effective.",
+//     valid: true,
+//     url: "https://www.cdc.gov/coronavirus/2019-ncov/vaccines/safety/safety-of-vaccines.html",
+//   },
+// ];
 
 
 const columns: ColumnDef<FakeNews>[] = [
@@ -83,7 +82,7 @@ const columns: ColumnDef<FakeNews>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "title",
+    accessorKey: "news",
     header: ({ column }) => {
       return (
         <Button
@@ -92,12 +91,12 @@ const columns: ColumnDef<FakeNews>[] = [
             column.toggleSorting(column.getIsSorted() === "asc")
           }
         >
-          Title
+          News
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("title")}</div>,
+    cell: ({ row }) => <div>{row.getValue("news")}</div>,
   },
   {
     accessorKey: "url",
@@ -138,9 +137,42 @@ export default function DataTableDemo() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [apiData, setApiData] = useState([]);
+  const [needFetch, setNeedFetch] = useState(true);
+
+  useEffect(() => {
+    // Function to fetch data from the API
+    const fetchData = async () => {
+      try {
+        console.log("fetching data");
+        const response = await axios.get("/api/search", {
+          params: { query: "palestine", count: 10 },
+          headers: { "Access-Control-Allow-Origin": "*" },
+        });
+        const data = await response.data;
+        const results = data.results || [];
+        
+        const fakeNewsData = results.map(([contentObject, score]: [any, any], index : number) => {
+          return {
+            id: index, // Use a unique identifier as the ID
+            news: contentObject.pageContent,
+            valid: contentObject.metadata.valid,
+            url: contentObject.metadata.url,
+          };
+        });
+  
+        setApiData(fakeNewsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    // Call the fetchData function when the component mounts
+    fetchData();
+  }, [needFetch]);
 
   const table = useReactTable({
-    data: data,
+    data: apiData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -161,41 +193,14 @@ export default function DataTableDemo() {
   return (
     <div className="container pt-20">
       <div className="w-full">
-        <div className="flex items-center py-4">
+        <div className="flex items-center py-4 gap-12">
           <Input
-            placeholder="Filter Title..."
-            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("title")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
+            placeholder="Filter by news"
+            className="max-w-screen-lg w-full"
           />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value: any) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button className="bg-primary text-primary-foreground w-36" onClick={() => setNeedFetch(!needFetch)}>
+            Search
+          </Button>
         </div>
         <div className="rounded-md border bg-white">
           <Table>
@@ -207,9 +212,9 @@ export default function DataTableDemo() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   ))}
                 </TableRow>

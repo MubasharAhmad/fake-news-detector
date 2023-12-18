@@ -18,8 +18,20 @@ export async function GET(req: NextRequest) {
 		}
 	);
 	try {
-		const { query, count } = await req.json();
-		const results = await vectorStore.similaritySearchVectorWithScore(query, count);
+		console.log(req.url);
+
+		// Parse query and count from req.url
+		const url = new URL(req.url);
+		let query = url.searchParams.get('query') || "";
+		let count = url.searchParams.get('count');
+
+		const countToPass = count ? parseInt(count, 10) : 10; 
+
+		console.log("Query:", query);
+		console.log("Count:", count);
+
+		// console.log(query, count);
+		const results = await vectorStore.similaritySearchWithScore(query, countToPass);
 		return Response.json({ results });
 	} catch (e) {
 		return Response.error();

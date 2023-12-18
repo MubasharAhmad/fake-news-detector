@@ -6,7 +6,7 @@ import { NextRequest } from "next/server";
 import { env } from "@/env.mjs";
 
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     const qdrantClient = new QdrantClient({
         apiKey: env.QDRANT_API_KEY,
         url: env.QDRANT_URL,
@@ -21,24 +21,23 @@ export async function POST(req: NextRequest) {
         }
     );
 
-    const getDocuments = await QdrantVectorStore.fromExistingCollection(
-        new OpenAIEmbeddings({ openAIApiKey: env.OPENAI_API_KEY }),
-        {
-            client: qdrantClient,
-            collectionName: env.QDRANT_COLLECTION_NAME,
-        }
-    );
-
     const splitter = new RecursiveCharacterTextSplitter({
         chunkSize: 50000,
         chunkOverlap: 1000,
     });
 
     try {
-        const allDocuments = await qdrantClient.getCollection
-        (env.QDRANT_COLLECTION_NAME);     
+        console.log("Getting all documents");
+        await vectorStore.ensureCollection();
+
+        const allDocuments = await vectorStore.similaritySearch(
+            "",
+            10,
+        );   
+        
         console.log(allDocuments);
-        return Response.json({ success: true, allDocuments});
+
+        return Response.json({ success: true, allDocuments });
     }
     catch (e) {
         console.error("Error processing request:", e);

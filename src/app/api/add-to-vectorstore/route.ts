@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     console.log(url);
     try {
       const response = await axios.get(url);
-	  console.log(response.data);
+      console.log(response.data);
       return response.data; // Return the actual data, not the entire response
     } catch (e) {
       return null; // Return null or handle the error accordingly
@@ -48,14 +48,14 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-    
-	const { news , url , valid } = await req.json();
-	console.log(news, url, valid);
+
+    const { news, url, valid } = await req.json();
+    console.log(news, url, valid);
 
     await vectorStore.ensureCollection();
     await vectorStore.addDocuments([{ pageContent: news, metadata: { url: url, valid: valid } }]);
-	console.log("Added to vector store");
-	return Response.json({ success: true });
+    console.log("Added to vector store");
+    return Response.json({ success: true });
   } catch (e) {
     console.error("Error processing request:", e);
     return Response.error();

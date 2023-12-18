@@ -55,8 +55,27 @@ export async function POST(req: NextRequest) {
     const topKeywords = removeStopwords(news.split(" "));
     console.log(topKeywords);
 
+    // count the frequency of each word
+    const wordCount: { [key: string]: number } = {}; // Add index signature
+
+    topKeywords.forEach(function (word) {
+      if (wordCount[word] === undefined) {
+        wordCount[word] = 1;
+      } else {
+        wordCount[word]++;
+      }
+    });
+
+    // store top keywords with their frequency
+    const topKeywordsWithFrequency: { [key: string]: number } = {};
+    for (const word in wordCount) {
+      topKeywordsWithFrequency[word] = wordCount[word];
+    }
+
+
+
     await vectorStore.ensureCollection();
-    await vectorStore.addDocuments([{ pageContent: news, metadata: { url: url, valid: valid, topKeywords : topKeywords } }]);
+    await vectorStore.addDocuments([{ pageContent: news, metadata: { url: url, valid: valid, topKeywords : topKeywordsWithFrequency } }]);
     console.log("Added to vector store");
     return Response.json({ success: true });
   } catch (e) {

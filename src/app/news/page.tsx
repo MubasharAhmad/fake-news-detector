@@ -37,6 +37,7 @@ export type FakeNews = {
   news: string
   valid: true | false
   url: string
+  score : number
 }
 
 
@@ -139,6 +140,8 @@ export default function DataTableDemo() {
   const [rowSelection, setRowSelection] = React.useState({});
   const [apiData, setApiData] = useState([]);
   const [needFetch, setNeedFetch] = useState(true);
+  const [inputValue, setInputValue] = useState("");
+  const [userQuery, setUserQuery] = useState("palestine");
 
   useEffect(() => {
     // Function to fetch data from the API
@@ -146,7 +149,8 @@ export default function DataTableDemo() {
       try {
         console.log("fetching data");
         const response = await axios.get("/api/search", {
-          params: { query: "palestine", count: 10 },
+          // params: { query: "palestine", count: 10 },
+          params: { query: userQuery, count: 10 },
           headers: { "Access-Control-Allow-Origin": "*" },
         });
         const data = await response.data;
@@ -158,8 +162,9 @@ export default function DataTableDemo() {
             news: contentObject.pageContent,
             valid: contentObject.metadata.valid,
             url: contentObject.metadata.url,
+            score: score,
           };
-        });
+        }).sort((a : any, b : any) => b.score - a.score);
   
         setApiData(fakeNewsData);
       } catch (error) {
@@ -197,8 +202,16 @@ export default function DataTableDemo() {
           <Input
             placeholder="Filter by news"
             className="max-w-screen-lg w-full"
+            onChange={(e) => {
+              setInputValue(e.target.value);
+            }}
           />
-          <Button className="bg-primary text-primary-foreground w-36" onClick={() => setNeedFetch(!needFetch)}>
+          <Button className="bg-primary text-primary-foreground w-36" onClick={() => 
+            {
+              setUserQuery(inputValue)
+              setNeedFetch(!needFetch)
+            }
+            }>
             Search
           </Button>
         </div>
